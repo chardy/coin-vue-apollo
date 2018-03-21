@@ -1,0 +1,5 @@
+fragment Currency on Currency {
+  id
+  name
+  min_size
+}
