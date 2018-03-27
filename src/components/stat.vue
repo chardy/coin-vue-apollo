@@ -1,7 +1,7 @@
 <template>
   <div class="grid">
     <div class="col-12">
-      <button :class="[{loading: $apollo.queries.stats.loading}, 'button-success button']" @click="refeshHandle">Refresh</button>
+      <button :class="[{loading: loading}, 'button-success button']" @click="refeshHandle">Refresh</button>
     </div>
     <div class="col-12">
       <h4 class="title">
@@ -40,26 +40,31 @@
 <script>
   const {Gql_Query_List_Stats} = require('./../graphql/queries/allStats')
   const {formatCount} = require('./format')
+  import { createApolloFetch } from 'apollo-fetch';
+  const uri = 'http://localhost:4000/graphql';
+  const apolloFetch = createApolloFetch({ uri });
   export default {
     data () {
       return {
+        loading: false,
         stats: [],
         moment, formatCount
       }
     },
     created() {
+      this.loadData()
     },  
-    apollo: {
-      stats: {
-        query: Gql_Query_List_Stats,
-        fetchPolicy: 'network-only',
-      },
-    },
     methods: {
-      refeshHandle(e) {
-        this.$apollo.queries.stats.refetch({
-          fetchPolicy: 'network-only'
+      loadData() {
+        apolloFetch({query: Gql_Query_List_Stats})
+        .then(({data:{stats}}) => {
+          this.stats = stats
+          this.loading = false
         })
+      },
+      refeshHandle(e) {
+        this.loading = true
+        this.loadData()
       }
     }
   }
